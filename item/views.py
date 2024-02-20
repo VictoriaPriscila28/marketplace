@@ -1,13 +1,21 @@
 from django.shortcuts import render,get_object_or_404, redirect
-from .models import Item
+from django.db.models import Q
+from .models import Item, Category
 from django.contrib.auth.decorators import login_required
 from .forms import NewItemForm, EditItemForm
 
 def items(request):
+    query = request.GET.get('query', '')
+    categories = Category.objects.all()
     items = Item.objects.filter(is_sold=False)
 
+    if query:
+        items = items.filter(Q(name__contains=query) | Q(description__contains=query))
+
     return render(request, 'item/items.html',{
-        'items':items,
+        'items': items,
+        'query': query,
+        'categories': categories,
     })
 
 def detail(request, pk):
